@@ -28,7 +28,7 @@ assert(exercise1(3, 2, 3) == 18)
 
 // Exercise 2
 
-def goodEnough(num: Double, aprx_num: Double, diff: Double = 0.00005): Boolean = {
+def goodEnough(num: Double, aprx_num: Double, diff: Double = 0.000000005): Boolean = {
   if (scala.math.abs(aprx_num - scala.math.sqrt(num)) <= diff) true
   else false
 }
@@ -75,7 +75,7 @@ scala.math.sqrt(10)
 
 //Exercise 4
 
-def goodEnoughCube(num: Double, aprx_num: Double, diff: Double = 0.00005): Boolean = {
+def goodEnoughCube(num: Double, aprx_num: Double, diff: Double = 0.00000005): Boolean = {
   if (scala.math.abs(aprx_num - scala.math.cbrt(num)) <= diff) true
   else false
 }
@@ -186,4 +186,28 @@ for (i <- 0 to curr_deepth) {
 //will be in output
 pascal_triangle(14)
 
+// Exercise 8
 
+def isPrime(num: BigInt, div: BigInt = 2): Boolean = {
+if (num == 2) true
+  else if (num < 2) false
+  else if (num % div == 0) false
+  else if (scala.math.pow(div.toDouble, 2).toInt > num) true
+  else isPrime(num, div+1)
+}
+
+//checking result
+val checkNum = 123123323
+if (isPrime(checkNum)) printf("Number %d is prime!", checkNum)
+else printf("Number %d is not prime!", checkNum)
+
+// Exercise 9
+
+
+
+def eval(l: List[String]): Int = {
+
+}
+
+assert(eval(List("1", "+", "2", "*", "3")) == 7)
+assert(eval(List("5", "*", "3", "+", "1")) == 16)
