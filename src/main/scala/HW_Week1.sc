@@ -38,12 +38,12 @@ if (goodEnough(num, 0.5*(xprev+(num.toFloat/xprev)))) 0.5*(xprev+(num.toFloat/xp
 else sqrt(num, 0.5*(xprev+(num.toFloat/xprev)))
 }
 
-//checking result
+//checking result.
 sqrt(10)
 scala.math.sqrt(10)
 
 // Exercise 3
-
+//define some functions to be passed as then- and else-clauses
 def printTrue(): Unit = {
   println("true")
 }
@@ -74,7 +74,7 @@ sqrtMyIf(10)
 scala.math.sqrt(10)
 
 //Exercise 4
-
+//define a new check methods for cubic root
 def goodEnoughCube(num: Double, aprx_num: Double, diff: Double = 0.00000005): Boolean = {
   if (scala.math.abs(aprx_num - scala.math.cbrt(num)) <= diff) true
   else false
@@ -107,7 +107,7 @@ assert(factorial(5) == 120)
 assert(factorial(10) == 3628800)
 assert(factorial(0) == 1)
 
-// tail recursion
+// tail recursion for factorial
 @tailrec
 def factorial_tailrec(num: BigInt, res: BigInt = 1): BigInt = {
   if (num == 1 | num == 0) res
@@ -143,7 +143,7 @@ assert(fibonacci(8) == 21)
 assert(fibonacci(9) == 34)
 assert(fibonacci(10) == 55)
 
-// tail recursion
+// tail recursion fibonacci
 @tailrec
 def fibonacci_tailrec(num: BigInt = 0, num_start: BigInt = 0, res: BigInt = 0, res_prev: BigInt = 0): BigInt = {
   if (num_start == 0) fibonacci_tailrec(num = num, num_start = num_start + 1)
@@ -174,15 +174,15 @@ def nck(n: Int, k: Int): BigInt = {
   factorial_tailrec(n) / (factorial_tailrec(k) * factorial_tailrec(n-k))
 }
 
-def pascal_triangle(max_deepth: Int, curr_deepth: Int = 0): Unit = {
-for (i <- 0 to curr_deepth) {
-  printf("%d ", nck(curr_deepth, i))
+def pascal_triangle(max_depth: Int, curr_depth: Int = 0): Unit = {
+for (i <- 0 to curr_depth) {
+  printf("%d ", nck(curr_depth, i))
 }
   println()
-  if (curr_deepth < max_deepth) pascal_triangle(max_deepth=max_deepth, curr_deepth = curr_deepth + 1)
+  if (curr_depth < max_depth) pascal_triangle(max_depth=max_depth, curr_depth = curr_depth + 1)
 }
 
-// checking result. output tarts from row 0, hence deepth 14 means 15 rows
+// checking result. output starts from row 0, hence depth 14 means 15 rows
 //will be in output
 pascal_triangle(14)
 
@@ -202,12 +202,69 @@ if (isPrime(checkNum)) printf("Number %d is prime!", checkNum)
 else printf("Number %d is not prime!", checkNum)
 
 // Exercise 9
+// method used to get n-th element of given evaluation list. Output is element value itself.
+def getNthElement(idx: Int, l: List[String]): String = {
+  (idx, l) match {
+    case (0, head :: _) => head
+    case (idx, _ :: tail) => getNthElement(idx-1, tail)
+    case (_, Nil) => Nil.toString
+  }
+}
 
+//method to find first occurrence of given element in the list. Output: sub-list before element,
+// index of a element and sublist after element.
+def findElement(elem: String, l: List[String], idx: Int = 0, headAcc: List[String] = List()): Any = {
+  l match {
+    case (head :: tail) => if (head == elem) (headAcc, idx, tail) else findElement(elem, tail, idx+1, headAcc :+ head)
+    case Nil => (Nil, 0, Nil)
+  }
+}
 
+//method used to remove last element of given list without using List API
+def removeLastElement(l: List[String], idx: BigInt = 0, newList: List[String] = Nil, prevHead: String = Nil.toString): List[String] = {
+  (l, idx, prevHead) match {
+    case (h :: tail, idx, pH) => {
+      if (pH == Nil.toString) removeLastElement(tail, idx+1, newList, h)
+      else removeLastElement(tail, idx+1, newList :+ prevHead, h)
+    }
+    case (Nil, _, _) => newList
+  }
+}
 
-def eval(l: List[String]): Int = {
+//methos used to parse trough the list using methods above and replace all product operations of any two numbers
+// by product result. Process runs till all product operations are calculated.
+// Output - new list without product operations
+def multiply(l: List[String]): List[String] = {
+  val (headList: List[String], multIdx: Int, tailList: List[String]) = findElement("*", l)
+  if (multIdx > 0){
+    val _::t = tailList
+    multiply(removeLastElement(headList) ::: (getNthElement(multIdx-1, l).toInt * getNthElement((multIdx.toInt + 1), l).toInt).toString :: t)
+  }
+  else l
+}
 
+// this method used to calculate all addition operations which the only ones left after multiplication performed.
+// Output is final number calculated.
+def add(l: List[String], res: BigInt = 0): BigInt = {
+  val (headList: List[String], addIdx: Int, tailList: List[String]) = findElement("+", l)
+  if (addIdx > 0)  {
+    val _::t = tailList
+    if (getNthElement(addIdx+2, (getNthElement(addIdx-1, l).toInt + getNthElement(addIdx+1, l).toInt).toString :: t) != Nil.toString){
+      add((getNthElement(addIdx-1, l).toInt + getNthElement(addIdx+1, l).toInt).toString :: t,
+        res + getNthElement(addIdx-1, l).toInt + getNthElement(addIdx+1, l).toInt)
+    }
+    else add((getNthElement(addIdx-1, l).toInt + getNthElement(addIdx+1, l).toInt).toString :: t,
+      getNthElement(addIdx-1, l).toInt + getNthElement(addIdx+1, l).toInt)
+  }
+  else res
+}
+
+//Just call multiplication and addition methods in a row - one after another one.
+def eval(l: List[String]): BigInt = {
+  add(multiply(l))
 }
 
 assert(eval(List("1", "+", "2", "*", "3")) == 7)
 assert(eval(List("5", "*", "3", "+", "1")) == 16)
+assert(eval(List("1", "+", "2", "*", "3", "*", "4", "+", "1", "*", "2")) == 27)
+assert(eval(List("1", "*", "2", "+", "3", "*", "4", "*", "2", "+", "3", "*", "3")) == 35)
